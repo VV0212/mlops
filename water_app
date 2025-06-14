@@ -1,1 +1,51 @@
 pip install flask
+
+from flask import Flask, request, render_template
+import pickle
+import numpy as np
+
+app = Flask(__name__)
+
+# Load your model
+with open("MLPROJECT/model.pkl", "rb") as f:
+    model = pickle.load(f)
+
+@app.route('/', methods=['GET', 'POST'])
+def predict():
+    prediction = None
+    if request.method == 'POST':
+        # Adjust these names/fields based on your model's input features
+        ph = float(request.form['ph'])
+        hardness = float(request.form['hardness'])
+        solids = float(request.form['solids'])
+        features = np.array([[ph, hardness, solids]])
+        prediction = model.predict(features)[0]
+
+    return render_template('form.html', prediction=prediction)
+
+if __name__ == '__main__':
+    app.run(debug=True)
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Water Quality Prediction</title>
+</head>
+<body>
+    <h1>Water Quality Prediction</h1>
+    <form method="post">
+        <label for="ph">pH:</label>
+        <input type="number" step="any" name="ph" required><br>
+        <label for="hardness">Hardness:</label>
+        <input type="number" step="any" name="hardness" required><br>
+        <label for="solids">Solids:</label>
+        <input type="number" step="any" name="solids" required><br>
+        <input type="submit" value="Predict">
+    </form>
+    {% if prediction is not none %}
+        <h2>Prediction: {{ prediction }}</h2>
+    {% endif %}
+</body>
+</html>
+
+python app.py
