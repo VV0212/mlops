@@ -1,1 +1,2 @@
-
+with open("MLPROJECT/model.pkl", "rb") as f:
+    model = pickle.load(f)
